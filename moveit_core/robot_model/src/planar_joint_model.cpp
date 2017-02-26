@@ -108,6 +108,13 @@ void moveit::core::PlanarJointModel::getVariableRandomPositions(random_numbers::
   else
     values[1] = rng.uniformReal(bounds[1].min_position_, bounds[1].max_position_);
   values[2] = rng.uniformReal(bounds[2].min_position_, bounds[2].max_position_);
+#if 0
+  std::cerr << "======A bounds:"
+            <<","<<bounds[0].min_position_<<":"<<bounds[0].max_position_
+            <<","<<bounds[1].min_position_<<":"<<bounds[1].max_position_
+            <<","<<bounds[2].min_position_<<":"<<bounds[2].max_position_
+            <<" values:"<<values[0]<<","<<values[1]<<","<<values[2]<<std::endl;
+#endif
 }
 
 void moveit::core::PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng,
@@ -127,8 +134,21 @@ void moveit::core::PlanarJointModel::getVariableRandomPositionsNearBy(random_num
     values[1] = rng.uniformReal(std::max(bounds[1].min_position_, near[1] - distance),
                                 std::min(bounds[1].max_position_, near[1] + distance));
 
-  double da = angular_distance_weight_ * distance;
-  values[2] = rng.uniformReal(near[2] - da, near[2] + da);
+  double da = distance / (1.0 + angular_distance_weight_);
+  if (da > boost::math::constants::pi<double>()*2.0)
+    values[2] = rng.uniformReal(bounds[2].min_position_, bounds[2].max_position_);
+  else
+    values[2] = rng.uniformReal(std::max(bounds[2].min_position_, near[2] - distance),
+                                std::min(bounds[2].max_position_, near[2] + distance));
+#if 0
+  std::cerr << "======B bounds:"
+            <<","<<bounds[0].min_position_<<":"<<bounds[0].max_position_
+            <<","<<bounds[1].min_position_<<":"<<bounds[1].max_position_
+            <<","<<bounds[2].min_position_<<":"<<bounds[2].max_position_
+            <<" near:"<<near[0]<<","<<near[1]<<","<<near[2]
+            <<" distance:"<<distance
+            <<" values:"<<values[0]<<","<<values[1]<<","<<values[2]<<std::endl;
+#endif
   normalizeRotation(values);
 }
 
