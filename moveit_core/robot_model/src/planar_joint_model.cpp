@@ -134,7 +134,11 @@ void moveit::core::PlanarJointModel::getVariableRandomPositionsNearBy(random_num
     values[1] = rng.uniformReal(std::max(bounds[1].min_position_, near[1] - distance),
                                 std::min(bounds[1].max_position_, near[1] + distance));
 
-  double da = angular_distance_weight_ * distance;
+  double da = 0.0;
+  if (fabs(angular_distance_weight_) > std::numeric_limits<double>::epsilon())
+    da = distance / angular_distance_weight_;
+  if (da > boost::math::constants::pi<double>())
+    da = boost::math::constants::pi<double>();
   values[2] = rng.uniformReal(near[2] - da, near[2] + da);
   normalizeRotation(values);
 }
