@@ -76,9 +76,16 @@ unsigned int moveit::core::PlanarJointModel::getStateSpaceDimension() const
 
 double moveit::core::PlanarJointModel::getMaximumExtent(const Bounds& other_bounds) const
 {
-  double dx = other_bounds[0].max_position_ - other_bounds[0].min_position_;
-  double dy = other_bounds[1].max_position_ - other_bounds[1].min_position_;
-  return sqrt(dx * dx + dy * dy) + boost::math::constants::pi<double>() * angular_distance_weight_;
+  double diff[2];
+  for (unsigned int i = 0; i < 2; ++i)
+  {
+    if (other_bounds[i].max_position_ >= std::numeric_limits<double>::infinity() ||
+        other_bounds[i].min_position_ <= -std::numeric_limits<double>::infinity())
+      diff[i] = 0.0;
+    else
+      diff[i] = other_bounds[i].max_position_ - other_bounds[i].min_position_;
+  }
+  return sqrt(diff[0] * diff[0] + diff[1] * diff[1]) + boost::math::constants::pi<double>() * angular_distance_weight_;
 }
 
 void moveit::core::PlanarJointModel::getVariableDefaultPositions(double* values, const Bounds& bounds) const
